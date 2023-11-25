@@ -90,10 +90,11 @@ processo_t *so_cria_processo(so_t *self, int pid) {
     if (self->num_processos < PROCESSOS_MAX) {
         processo_t *processo = &self->tabela_de_processos[self->num_processos++];
         processo->pid = pid;
+        processo->estado = PRONTO;
         return processo;
     } else {
-        /// tabela de processos está cheia, não pode criar mais processos
-        return NULL;
+        console_printf(self->console, "Tabela de processos cheia, não foi possível criar o processo\n");
+        return -1;
     }
 }
 
