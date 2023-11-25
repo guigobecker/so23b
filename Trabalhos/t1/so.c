@@ -13,9 +13,17 @@
 
 #define PROCESSOS_MAX 100 /// numero maximo de processos
 
+/// define estados de um processo
+typedef enum {
+    PRONTO,
+    BLOQUEADO,
+    PARADO
+} estado_t;
+
 /// estrutura que contém informação a respeito de um processo
 typedef struct {
     int pid;  /// id do processo
+    estado_t estado; /// estado do processo
 } processo_t;
 
 struct so_t {
