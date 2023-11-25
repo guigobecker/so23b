@@ -38,7 +38,7 @@ struct so_t {
 };
 
 /// função para criar um processo
-processo_t *processo_cria(int pid) {
+processo_t *so_cria_processo(int pid) {
     processo_t *processo = malloc(sizeof(processo_t));
     if (processo != NULL) {
         processo->pid = pid;
@@ -47,7 +47,7 @@ processo_t *processo_cria(int pid) {
 }
 
 /// função para destruir um processo
-void processo_destroi(processo_t *processo) {
+void so_destroi_processo(processo_t *processo) {
     free(processo);
 }
 
