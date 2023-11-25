@@ -24,7 +24,8 @@ struct so_t {
   console_t *console;
   relogio_t *relogio;
   processo_t *processo_atual; /// ponteiro para o processo que está sendo executado
-  processo_t *tabela_de_processos[PROCESSOS_MAX]; /// tabela de processos
+  processo_t tabela_de_processos[PROCESSOS_MAX]; /// tabela de processos
+  processo_t processo_especial; /// variável para quando não há nenhum processo em execução
   int num_processos; /// número de processos na tabela
 };
 
@@ -60,7 +61,7 @@ so_t *so_cria(cpu_t *cpu, mem_t *mem, console_t *console, relogio_t *relogio)
   self->mem = mem;
   self->console = console;
   self->relogio = relogio;
-  self->processo_atual = NULL; /// inicializa o ponteiro de processo atual
+  self->processo_atual = &self->processo_especial; /// inicializa com nenhum processo em execução
   self->num_processos = 0; /// inicializa o número de processos em 0
 
   // quando a CPU executar uma instrução CHAMAC, deve chamar a função
