@@ -24,6 +24,10 @@ typedef enum {
 typedef struct {
     int pid;  /// id do processo
     estado_t estado; /// estado do processo
+    int pc;
+    int a;
+    int x;
+    err_t erro;
 } processo_t;
 
 struct so_t {
@@ -91,10 +95,14 @@ processo_t *so_cria_processo(so_t *self, int pid) {
         processo_t *processo = &self->tabela_de_processos[self->num_processos++];
         processo->pid = pid;
         processo->estado = PRONTO;
+        processo->pc = 0;
+        processo->a = 0;
+        processo->x = 0;
+        processo->erro = ERR_OK;
         return processo;
     } else {
         console_printf(self->console, "Tabela de processos cheia, não foi possível criar o processo\n");
-        return -1;
+        return NULL;
     }
 }
 
@@ -148,11 +156,17 @@ static err_t so_trata_interrupcao(void *argC, int reg_A)
 static void so_salva_estado_da_cpu(so_t *self)
 {
   // se não houver processo corrente, não faz nada
+  if(self->processo_atual == &self->processo_especial) return;
   // salva os registradores que compõem o estado da cpu no descritor do
-  //   processo corrente
+  // processo corrente
+  // mem_escreve(self->mem, IRQ_END_PC, endereco onde vai o PC no descritor);
   // mem_le(self->mem, IRQ_END_A, endereco onde vai o A no descritor);
   // mem_le(self->mem, IRQ_END_X, endereco onde vai o X no descritor);
   // etc
+  mem_escreve(self->mem, IRQ_END_PC, self->processo_atual->pc);
+  mem_escreve(self->mem, IRQ_END_A, self->processo_atual->a);
+  mem_escreve(self->mem, IRQ_END_X, self->processo_atual->x);
+  mem_escreve(self->mem, IRQ_END_erro, self->processo_atual->erro);
 }
 static void so_trata_pendencias(so_t *self)
 {
