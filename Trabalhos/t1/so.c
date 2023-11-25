@@ -84,6 +84,18 @@ so_t *so_cria(cpu_t *cpu, mem_t *mem, console_t *console, relogio_t *relogio)
   return self;
 }
 
+/// função para criar um processo e adicionar ele na tabela de processos
+processo_t *so_cria_processo(so_t *self, int pid) {
+    if (self->num_processos < PROCESSOS_MAX) {
+        processo_t *processo = &self->tabela_de_processos[self->num_processos++];
+        processo->pid = pid;
+        return processo;
+    } else {
+        /// tabela de processos está cheia, não pode criar mais processos
+        return NULL;
+    }
+}
+
 void so_destroi(so_t *self)
 {
   cpu_define_chamaC(self->cpu, NULL, NULL);
