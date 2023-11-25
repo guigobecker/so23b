@@ -61,6 +61,7 @@ so_t *so_cria(cpu_t *cpu, mem_t *mem, console_t *console, relogio_t *relogio)
   self->console = console;
   self->relogio = relogio;
   self->processo_atual = NULL; /// inicializa o ponteiro de processo atual
+  self->num_processos = 0; /// inicializa o número de processos em 0
 
   // quando a CPU executar uma instrução CHAMAC, deve chamar a função
   //   so_trata_interrupcao
