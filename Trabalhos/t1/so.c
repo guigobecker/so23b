@@ -84,6 +84,12 @@ so_t *so_cria(cpu_t *cpu, mem_t *mem, console_t *console, relogio_t *relogio)
   return self;
 }
 
+void so_destroi(so_t *self)
+{
+  cpu_define_chamaC(self->cpu, NULL, NULL);
+  free(self);
+}
+
 /// função para criar um processo e adicionar ele na tabela de processos
 processo_t *so_cria_processo(so_t *self, int pid) {
     if (self->num_processos < PROCESSOS_MAX) {
@@ -95,13 +101,6 @@ processo_t *so_cria_processo(so_t *self, int pid) {
         return NULL;
     }
 }
-
-void so_destroi(so_t *self)
-{
-  cpu_define_chamaC(self->cpu, NULL, NULL);
-  free(self);
-}
-
 
 // Tratamento de interrupção
 
@@ -377,6 +376,15 @@ static void so_chamada_mata_proc(so_t *self)
 // retorna o endereço de carga ou -1
 static int so_carrega_programa(so_t *self, char *nome_do_executavel)
 {
+  /// cria o processo inicial
+  processo_t *processo_inicial = so_cria_processo(self, 0);
+  if (processo_inicial == NULL) {
+      console_printf(self->console,
+          "Não foi possível criar o processo inicial\n");
+      free(self);
+      return -1;
+  }
+
   // programa para executar na nossa CPU
   programa_t *prog = prog_cria(nome_do_executavel);
   if (prog == NULL) {
@@ -395,6 +403,7 @@ static int so_carrega_programa(so_t *self, char *nome_do_executavel)
       return -1;
     }
   }
+
   prog_destroi(prog);
   console_printf(self->console,
       "SO: carga de '%s' em %d-%d", nome_do_executavel, end_ini, end_fim);
