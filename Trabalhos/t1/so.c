@@ -37,20 +37,6 @@ struct so_t {
   int num_processos; /// número de processos na tabela
 };
 
-/// função para criar um processo
-processo_t *so_cria_processo(int pid) {
-    processo_t *processo = malloc(sizeof(processo_t));
-    if (processo != NULL) {
-        processo->pid = pid;
-    }
-    return processo;
-}
-
-/// função para destruir um processo
-void so_destroi_processo(processo_t *processo) {
-    free(processo);
-}
-
 // função de tratamento de interrupção (entrada no SO)
 static err_t so_trata_interrupcao(void *argC, int reg_A);
 
@@ -109,6 +95,11 @@ processo_t *so_cria_processo(so_t *self, int pid) {
         /// tabela de processos está cheia, não pode criar mais processos
         return NULL;
     }
+}
+
+/// função para destruir um processo
+void so_destroi_processo(processo_t *processo) {
+    free(processo);
 }
 
 // Tratamento de interrupção
