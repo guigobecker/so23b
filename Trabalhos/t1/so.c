@@ -175,9 +175,15 @@ static void so_trata_pendencias(so_t *self)
 }
 static void so_escalona(so_t *self)
 {
-  // escolhe o próximo processo a executar, que passa a ser o processo
-  //   corrente; pode continuar sendo o mesmo de antes ou não
+    int prox_indice = (self->processo_atual->pid + 1) % self->num_processos;
+
+    while (self->tabela_de_processos[prox_indice].estado != PRONTO) {
+        prox_indice = (prox_indice + 1) % self->num_processos;
+    }
+
+    self->processo_atual->pid = prox_indice;
 }
+
 static void so_despacha(so_t *self)
 {
   // recupera o estado do processo corrente
