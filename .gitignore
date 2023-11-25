@@ -1,1 +1,7 @@
 tags
+main
+*.d
+*.o
+montador
+*.maq
+log_da_console

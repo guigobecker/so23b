@@ -1,3 +1,5 @@
+/// Lorenzo Sacchet Tascheto e Rodrigo Schmidt Becker
+
 #include "so.h"
 #include "irq.h"
 #include "programa.h"
@@ -8,6 +10,8 @@
 
 // intervalo entre interrupções do relógio
 #define INTERVALO_INTERRUPCAO 50   // em instruções executadas
+
+#define PROCESSOS_MAX 100 /// numero maximo de processos
 
 /// estrutura que contém informação a respeito de um processo
 typedef struct {
@@ -20,6 +24,8 @@ struct so_t {
   console_t *console;
   relogio_t *relogio;
   processo_t *processo_atual; /// ponteiro para o processo que está sendo executado
+  processo_t *tabela_de_processos[PROCESSOS_MAX]; /// tabela de processos
+  int num_processos; /// número de processos na tabela
 };
 
 /// função para criar um processo
