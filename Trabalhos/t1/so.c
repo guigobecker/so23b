@@ -156,17 +156,19 @@ static err_t so_trata_interrupcao(void *argC, int reg_A)
 static void so_salva_estado_da_cpu(so_t *self)
 {
   // se não houver processo corrente, não faz nada
-  if(self->processo_atual == &self->processo_especial) return;
   // salva os registradores que compõem o estado da cpu no descritor do
   // processo corrente
   // mem_escreve(self->mem, IRQ_END_PC, endereco onde vai o PC no descritor);
   // mem_le(self->mem, IRQ_END_A, endereco onde vai o A no descritor);
   // mem_le(self->mem, IRQ_END_X, endereco onde vai o X no descritor);
   // etc
+
+  if(self->processo_atual == &self->processo_especial) return;
+
   mem_escreve(self->mem, IRQ_END_PC, self->processo_atual->pc);
-  mem_escreve(self->mem, IRQ_END_A, self->processo_atual->a);
-  mem_escreve(self->mem, IRQ_END_X, self->processo_atual->x);
-  mem_escreve(self->mem, IRQ_END_erro, self->processo_atual->erro);
+  self->processo_atual->a = mem_le(self->mem, IRQ_END_A, NULL);
+  self->processo_atual->x = mem_le(self->mem, IRQ_END_X, NULL);
+  self->processo_atual->erro = mem_le(self->mem, IRQ_END_erro, NULL);
 }
 static void so_trata_pendencias(so_t *self)
 {
@@ -183,9 +185,16 @@ static void so_escalona(so_t *self)
 }
 static void so_despacha(so_t *self)
 {
-  // se não houver processo corrente, coloca ERR_CPU_PARADA em IRQ_END_erro
-  // se houver processo corrente, coloca todo o estado desse processo em
-  //   IRQ_END_*
+  // recupera o estado do processo corrente
+  // mem_le(self->mem, IRQ_END_PC, endereco onde está o PC no descritor);
+  // mem_escreve(self->mem, IRQ_END_A, endereco onde está o A no descritor);
+  // mem_escreve(self->mem, IRQ_END_X, endereco onde está o X no descritor);
+  // etc
+  
+  self->processo_atual->pc = mem_le(self->mem, IRQ_END_PC, NULL);
+  mem_escreve(self->mem, IRQ_END_A, self->processo_atual->a);
+  mem_escreve(self->mem, IRQ_END_X, self->processo_atual->x);
+  mem_escreve(self->mem, IRQ_END_erro, self->processo_atual->erro);
 }
 
 static err_t so_trata_irq(so_t *self, int irq)
