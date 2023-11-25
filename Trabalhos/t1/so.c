@@ -9,13 +9,32 @@
 // intervalo entre interrupções do relógio
 #define INTERVALO_INTERRUPCAO 50   // em instruções executadas
 
+/// estrutura que contém informação a respeito de um processo
+typedef struct {
+    int pid;  /// id do processo
+} processo_t;
+
 struct so_t {
   cpu_t *cpu;
   mem_t *mem;
   console_t *console;
   relogio_t *relogio;
+  processo_t *processo_atual; /// ponteiro para o processo que está sendo executado
 };
 
+/// função para criar um processo
+processo_t *processo_cria(int pid) {
+    processo_t *processo = malloc(sizeof(processo_t));
+    if (processo != NULL) {
+        processo->pid = pid;
+    }
+    return processo;
+}
+
+/// função para destruir um processo
+void processo_destroi(processo_t *processo) {
+    free(processo);
+}
 
 // função de tratamento de interrupção (entrada no SO)
 static err_t so_trata_interrupcao(void *argC, int reg_A);
@@ -35,6 +54,7 @@ so_t *so_cria(cpu_t *cpu, mem_t *mem, console_t *console, relogio_t *relogio)
   self->mem = mem;
   self->console = console;
   self->relogio = relogio;
+  self->processo_atual = NULL; /// inicializa o ponteiro de processo atual
 
   // quando a CPU executar uma instrução CHAMAC, deve chamar a função
   //   so_trata_interrupcao
