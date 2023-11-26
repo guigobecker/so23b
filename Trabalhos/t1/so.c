@@ -10,8 +10,8 @@
 
 // intervalo entre interrupções do relógio
 #define INTERVALO_INTERRUPCAO 50   // em instruções executadas
-
 #define PROCESSOS_MAX 100 /// numero maximo de processos
+#define TERMINAIS_MAX 4 /// numero maximo de terminais
 
 /// define estados de um processo
 typedef enum {
@@ -337,9 +337,13 @@ static void so_chamada_le(so_t *self)
   //   o caso
   // implementação lendo direto do terminal A
   //   deveria usar dispositivo corrente de entrada do processo
+
+  /// usar terminais diferentes dependendo do id
+  int entrada = self->processo_atual->pid % TERMINAIS_MAX;
+
   for (;;) {
     int estado;
-    term_le(self->console, 1, &estado);
+    term_le(self->console, entrada, &estado);
     if (estado != 0) break;
     // como não está saindo do SO, o laço do processador não tá rodando
     // esta gambiarra faz o console andar
@@ -349,7 +353,7 @@ static void so_chamada_le(so_t *self)
     console_atualiza(self->console);
   }
   int dado;
-  term_le(self->console, 0, &dado);
+  term_le(self->console, entrada, &dado);
   // com processo, deveria escrever no reg A do processo
   mem_escreve(self->mem, IRQ_END_A, dado);
 }
@@ -360,9 +364,13 @@ static void so_chamada_escr(so_t *self)
   //   deveria bloquear o processo se dispositivo ocupado
   // implementação escrevendo direto do terminal A
   //   deveria usar dispositivo corrente de saída do processo
+
+  /// usar terminais diferentes dependendo do id
+  int saida = self->processo_atual->pid % TERMINAIS_MAX;
+
   for (;;) {
     int estado;
-    term_le(self->console, 3, &estado);
+    term_le(self->console, saida, &estado);
     if (estado != 0) break;
     // como não está saindo do SO, o laço do processador não tá rodando
     // esta gambiarra faz o console andar
@@ -371,7 +379,7 @@ static void so_chamada_escr(so_t *self)
   }
   int dado;
   mem_le(self->mem, IRQ_END_X, &dado);
-  term_escr(self->console, 2, dado);
+  term_escr(self->console, saida, dado);
   mem_escreve(self->mem, IRQ_END_A, 0);
 }
 
