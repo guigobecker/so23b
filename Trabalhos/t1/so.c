@@ -377,10 +377,10 @@ static void so_chamada_escr(so_t *self)
 
 static void so_chamada_cria_proc(so_t *self)
 {
-    int ender_proc;
+    int ender_proc = self->processo_atual->x;
 
     /// pega o endereço do processo no registrador x do processo atual e bota em ender_proc
-    if (mem_le(self->mem, self->processo_atual->x, &ender_proc) == ERR_OK) {
+    if (self->processo_atual->erro == ERR_OK) {
 
       char nome[100];
 
@@ -392,11 +392,10 @@ static void so_chamada_cria_proc(so_t *self)
         if (ender_carga > 0) {
           processo_t *novo_processo = so_cria_processo(self, self->num_processos++);
 
-          /// se criou certo, escreve o endereço de carga no PC do novo processo
+          /// se criou certo, atualiza o PC do novo processo e o A do processo atual
           if (novo_processo != NULL) {
             novo_processo->pc = ender_carga;
-            /// escreve o pid do novo processo no registrador A do processo atual
-            mem_escreve(self->mem, self->processo_atual->a, novo_processo->pid);
+            self->processo_atual->a = novo_processo->pid;
             return;
           }
         }
