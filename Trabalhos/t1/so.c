@@ -266,7 +266,7 @@ static err_t so_trata_irq_err_cpu(so_t *self)
   mem_le(self->mem, IRQ_END_erro, &err_int);
   err_t err = err_int;
   console_printf(self->console,
-      "SO: IRQ não tratada -- erro na CPU: %s", err_nome(err));
+      "SO: IRQ nao tratada -- erro na CPU: %s", err_nome(err));
   return ERR_CPU_PARADA;
 }
 
@@ -279,14 +279,14 @@ static err_t so_trata_irq_relogio(so_t *self)
   // trata a interrupção
   // por exemplo, decrementa o quantum do processo corrente, quando se tem
   // um escalonador com quantum
-  console_printf(self->console, "SO: interrupção do relógio (não tratada)");
+  console_printf(self->console, "SO: interrupcao do relogio (nao tratada)");
   return ERR_OK;
 }
 
 static err_t so_trata_irq_desconhecida(so_t *self, int irq)
 {
   console_printf(self->console,
-      "SO: não sei tratar IRQ %d (%s)", irq, irq_nome(irq));
+      "SO: nao sei tratar IRQ %d (%s)", irq, irq_nome(irq));
   return ERR_CPU_PARADA;
 }
 
@@ -409,7 +409,7 @@ static void so_chamada_cria_proc(so_t *self)
       }
     }
   /// se caiu aqui deu erro    
-  console_printf(self->console, "Não foi possível criar o processo inicial\n");
+  console_printf(self->console, "Nao foi possivel criar o processo inicial\n");
   mem_escreve(self->mem, self->processo_atual->a, -1);
 }
 
@@ -439,7 +439,7 @@ static int so_carrega_programa(so_t *self, char *nome_do_executavel)
   for (int end = end_ini; end < end_fim; end++) {
     if (mem_escreve(self->mem, end, prog_dado(prog, end)) != ERR_OK) {
       console_printf(self->console,
-          "Erro na carga da memória, endereco %d\n", end);
+          "Erro na carga da memoria, endereco %d\n", end);
       return -1;
     }
   }
