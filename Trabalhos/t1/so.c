@@ -101,7 +101,7 @@ processo_t *so_cria_processo(so_t *self, int pid) {
         processo->erro = ERR_OK;
         return processo;
     } else {
-        console_printf(self->console, "Tabela de processos cheia, não foi possível criar o processo\n");
+        console_printf(self->console, "Tabela de processos cheia, nao foi possivel criar o processo\n");
         return NULL;
     }
 }
@@ -185,7 +185,7 @@ static void so_escalona(so_t *self)
 
 static void so_despacha(so_t *self)
 {
-  // copia os registradores do processo para a cpu
+  /// copia os registradores do processo para a cpu
   mem_escreve(self->mem, IRQ_END_PC, self->processo_atual->pc);
   mem_escreve(self->mem, IRQ_END_A, self->processo_atual->a);
   mem_escreve(self->mem, IRQ_END_X, self->processo_atual->x);
@@ -248,7 +248,7 @@ static err_t so_trata_irq_reset(so_t *self)
   rel_escr(self->relogio, 3, 0);
   rel_escr(self->relogio, 2, INTERVALO_INTERRUPCAO);
 
-  console_printf(self->console, "SO: reset concluído com sucesso\n");
+  console_printf(self->console, "SO: reset concluido com sucesso\n");
 
   return ERR_OK;
 }
