@@ -377,30 +377,34 @@ static void so_chamada_escr(so_t *self)
 
 static void so_chamada_cria_proc(so_t *self)
 {
-  /// endereço do processo que chamou o sistema
-  int ender_proc = self->processo_atual->x;
+    int ender_proc;
 
-  /// lê o nome do programa a ser executado
-  if (mem_le(self->mem, IRQ_END_X, &ender_proc) == ERR_OK) {
-    char nome[100];
-    if (copia_str_da_mem(100, nome, self->mem, ender_proc)) {
-      /// carrega o programa na memória
-      int ender_carga = so_carrega_programa(self, nome);
+    /// pega o endereço do processo no registrador x do processo atual e bota em ender_proc
+    if (mem_le(self->mem, self->processo_atual->x, &ender_proc) == ERR_OK) {
 
-      if (ender_carga > 0) {
-        /// cria o processo
-        processo_t *processo = so_cria_processo(self, self->num_processos);
-        if (processo != NULL) {
-          processo->pc = ender_carga;
-          mem_escreve(self->mem, IRQ_END_A, processo->pid);
-          return;
+      char nome[100];
+
+      /// se copiou o nome certo, chama so_carrega_programa
+      if (copia_str_da_mem(100, nome, self->mem, ender_proc)) {
+        int ender_carga = so_carrega_programa(self, nome);
+
+        /// se carregou certo, cria o processo
+        if (ender_carga > 0) {
+          processo_t *novo_processo = so_cria_processo(self, self->num_processos++);
+
+          /// se criou certo, escreve o endereço de carga no PC do novo processo
+          if (novo_processo != NULL) {
+            novo_processo->pc = ender_carga;
+            /// escreve o pid do novo processo no registrador A do processo atual
+            mem_escreve(self->mem, self->processo_atual->a, novo_processo->pid);
+            return;
+          }
         }
       }
     }
-  }
-
-  /// erro
-  mem_escreve(self->mem, IRQ_END_A, -1);
+  /// se caiu aqui deu erro    
+  console_printf(self->console, "Não foi possível criar o processo inicial\n");
+  mem_escreve(self->mem, self->processo_atual->a, -1);
 }
 
 static void so_chamada_mata_proc(so_t *self)
@@ -415,15 +419,6 @@ static void so_chamada_mata_proc(so_t *self)
 // retorna o endereço de carga ou -1
 static int so_carrega_programa(so_t *self, char *nome_do_executavel)
 {
-  /// cria o processo inicial
-  processo_t *processo_inicial = so_cria_processo(self, 0);
-  if (processo_inicial == NULL) {
-      console_printf(self->console,
-          "Não foi possível criar o processo inicial\n");
-      free(self);
-      return -1;
-  }
-
   // programa para executar na nossa CPU
   programa_t *prog = prog_cria(nome_do_executavel);
   if (prog == NULL) {
