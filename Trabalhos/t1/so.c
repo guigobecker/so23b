@@ -185,7 +185,7 @@ static void so_escalona(so_t *self)
 
 static void so_despacha(so_t *self)
 {
-  // recupera o estado do processo corrente
+  // copia os registradores do processo para a cpu
   mem_escreve(self->mem, IRQ_END_PC, self->processo_atual->pc);
   mem_escreve(self->mem, IRQ_END_A, self->processo_atual->a);
   mem_escreve(self->mem, IRQ_END_X, self->processo_atual->x);
