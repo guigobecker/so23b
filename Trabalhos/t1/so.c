@@ -225,17 +225,32 @@ static err_t so_trata_irq_reset(so_t *self)
     return ERR_CPU_PARADA;
   }
 
-  // deveria criar um processo para o init, e inicializar o estado do
-  //   processador para esse processo com os registradores zerados, exceto
-  //   o PC e o modo.
-  // como não tem suporte a processos, está carregando os valores dos
-  //   registradores diretamente para a memória, de onde a CPU vai carregar
-  //   para os seus registradores quando executar a instrução RETI
+  /// inicializa a tabela de processos
+  for (int i = 0; i < self->num_processos; ++i) {
+    self->tabela_de_processos[i].estado = PARADO;
+  }
+
+  /// cria processo inicial
+  processo_t *processo_inicial = so_cria_processo(self, 0);
+  if (processo_inicial == NULL) {
+      console_printf(self->console, "SO: problema ao criar processo inicial\n");
+      return ERR_CPU_PARADA;
+  }
+
+  /// inicializa o estado do processador para o processo inicial
+  processo_inicial->pc = ender;
 
   // altera o PC para o endereço de carga (deve ter sido 100)
   mem_escreve(self->mem, IRQ_END_PC, ender);
   // passa o processador para modo usuário
   mem_escreve(self->mem, IRQ_END_modo, usuario);
+
+  // reseta o relógio
+  rel_escr(self->relogio, 3, 0);
+  rel_escr(self->relogio, 2, INTERVALO_INTERRUPCAO);
+
+  console_printf(self->console, "SO: reset concluído com sucesso\n");
+
   return ERR_OK;
 }
 
