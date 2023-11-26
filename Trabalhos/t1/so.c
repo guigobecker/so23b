@@ -377,25 +377,29 @@ static void so_chamada_escr(so_t *self)
 
 static void so_chamada_cria_proc(so_t *self)
 {
-  // ainda sem suporte a processos, carrega programa e passa a executar ele
-  // quem chamou o sistema não vai mais ser executado, coitado!
+  /// endereço do processo que chamou o sistema
+  int ender_proc = self->processo_atual->x;
 
-  // em X está o endereço onde está o nome do arquivo
-  int ender_proc;
-  // deveria ler o X do descritor do processo criador
+  /// lê o nome do programa a ser executado
   if (mem_le(self->mem, IRQ_END_X, &ender_proc) == ERR_OK) {
     char nome[100];
     if (copia_str_da_mem(100, nome, self->mem, ender_proc)) {
+      /// carrega o programa na memória
       int ender_carga = so_carrega_programa(self, nome);
+
       if (ender_carga > 0) {
-        // deveria escrever no PC do descritor do processo criado
-        mem_escreve(self->mem, IRQ_END_PC, ender_carga);
-        return;
+        /// cria o processo
+        processo_t *processo = so_cria_processo(self, self->num_processos);
+        if (processo != NULL) {
+          processo->pc = ender_carga;
+          mem_escreve(self->mem, IRQ_END_A, processo->pid);
+          return;
+        }
       }
     }
   }
-  // deveria escrever -1 (se erro) ou o PID do processo criado (se OK) no reg A
-  //   do processo que pediu a criação
+
+  /// erro
   mem_escreve(self->mem, IRQ_END_A, -1);
 }
 
