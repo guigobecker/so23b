@@ -277,19 +277,16 @@ static err_t so_trata_irq_reset(so_t *self)
 
 static err_t so_trata_irq_err_cpu(so_t *self)
 {
-  // Ocorreu um erro interno na CPU
-  // O erro está codificado em IRQ_END_erro
-  // Em geral, causa a morte do processo que causou o erro
-  // Ainda não temos processos, causa a parada da CPU
-  int err_int;
-  // com suporte a processos, deveria pegar o valor do registrador erro
-  //   no descritor do processo corrente, e reagir de acordo com esse erro
-  //   (em geral, matando o processo)
-  mem_le(self->mem, IRQ_END_erro, &err_int);
-  err_t err = err_int;
-  console_printf(self->console,
-      "SO: IRQ nao tratada -- erro na CPU: %s", err_nome(err));
-  return ERR_CPU_PARADA;
+  if(self->processo_atual == &self->processo_especial){
+    console_printf(self->console, "processo atual nao existe");
+    return ERR_CPU_PARADA;
+  }
+
+  console_printf(self->console, "SO: matei o processo %d\n", self->processo_atual->pid);
+  so_destroi_processo(self, self->processo_atual);
+  so_escalona(self);
+  so_despacha(self);
+  return ERR_OK;
 }
 
 static err_t so_trata_irq_relogio(so_t *self)
@@ -450,7 +447,7 @@ static void so_chamada_mata_proc(so_t *self)
       if(self->tabela_de_processos[i].pid == pid){
         so_destroi_processo(self, &self->tabela_de_processos[i]);
         console_printf(self->console, "SO: matei o processo %d\n", pid);
-        
+
         return;
       }
     }
