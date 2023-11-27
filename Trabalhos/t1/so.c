@@ -107,8 +107,30 @@ processo_t *so_cria_processo(so_t *self, int pid) {
 }
 
 /// função para destruir um processo
-void so_destroi_processo(processo_t *processo) {
+void so_destroi_processo(so_t *self, processo_t *processo) {
     free(processo);
+    
+    /// decrementa número de processos
+    self->num_processos--;
+    
+    /// se esse era o processo atual, aponta para o processo especial
+    if(self->processo_atual == processo)
+        self->processo_atual = &self->processo_especial;
+
+    /// se esse era o último processo, não precisa fazer nada
+    if(self->num_processos == 0)
+        return;
+    
+    /// se não era o último processo, precisa tirar ele da tabela
+    for (int i = 0; i < self->num_processos; i++) {
+        if (&self->tabela_de_processos[i] == processo) {
+            // encontrou o processo destruído, agora move todos à direita dele 1 casa para esquerda
+            for (int j = i; j < self->num_processos - 1; j++) {
+                self->tabela_de_processos[j] = self->tabela_de_processos[j + 1];
+            }
+            break;
+        }
+    }
 }
 
 // Tratamento de interrupção
@@ -415,9 +437,28 @@ static void so_chamada_cria_proc(so_t *self)
 
 static void so_chamada_mata_proc(so_t *self)
 {
-  // ainda sem suporte a processos, retorna erro -1
-  console_printf(self->console, "SO: SO_MATA_PROC não implementada");
-  mem_escreve(self->mem, IRQ_END_A, -1);
+  /// pega o pid do processo a ser morto
+  int pid = self->processo_atual->a;
+
+  /// verifica se tem erro
+  if(self->processo_atual->erro == ERR_OK){
+
+    /// procura o processo com o pid especificado
+    for(int i = 0; i < self->num_processos; i++){
+
+      /// achou, mata
+      if(self->tabela_de_processos[i].pid == pid){
+        so_destroi_processo(self, &self->tabela_de_processos[i]);
+        console_printf(self->console, "SO: matei o processo %d\n", pid);
+        
+        return;
+      }
+    }
+  }
+
+  /// se caiu aqui deu erro
+  console_printf(self->console, "SO: nao consegui matar o processo %d\n", pid);
+  mem_escreve(self->mem, self->processo_atual->a, -1);
 }
 
 
